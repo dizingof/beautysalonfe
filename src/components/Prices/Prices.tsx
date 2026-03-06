@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { services, categoryNames } from '../../data/mockData';
-import type { ServiceCategory } from '../../types';
+import { useState, useEffect } from 'react';
+import { getServices, getCategories } from '../../api/client';
+import type { ServiceCategory, Service } from '../../types';
 import styles from './Prices.module.css';
 
-const categories: ServiceCategory[] = ['sugaring', 'manicure', 'pedicure', 'brows'];
+const categoryOrder: ServiceCategory[] = ['sugaring', 'manicure', 'pedicure', 'brows'];
 
 interface PricesProps {
   onBookService: (serviceId: string) => void;
@@ -12,8 +12,25 @@ interface PricesProps {
 
 export default function Prices({ onBookService, initialCategory }: PricesProps) {
   const [activeCategory, setActiveCategory] = useState<ServiceCategory>(initialCategory || 'sugaring');
+  const [allServices, setAllServices] = useState<Service[]>([]);
+  const [catNames, setCatNames] = useState<Record<string, string>>({});
 
-  const filteredServices = services.filter((s) => s.category === activeCategory);
+  useEffect(() => {
+    getServices().then(setAllServices).catch(console.error);
+    getCategories()
+      .then((cats) => {
+        const map: Record<string, string> = {};
+        cats.forEach((c) => (map[c.key] = c.name));
+        setCatNames(map);
+      })
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (initialCategory) setActiveCategory(initialCategory);
+  }, [initialCategory]);
+
+  const filteredServices = allServices.filter((s) => s.category === activeCategory);
 
   return (
     <section id="prices" className={`section ${styles.prices}`}>
@@ -21,13 +38,13 @@ export default function Prices({ onBookService, initialCategory }: PricesProps) 
         <h2 className="section-title">Ціни</h2>
 
         <div className={styles['prices-tabs']}>
-          {categories.map((cat) => (
+          {categoryOrder.map((cat) => (
             <button
               key={cat}
               className={`${styles['prices-tab']} ${activeCategory === cat ? styles.active : ''}`}
               onClick={() => setActiveCategory(cat)}
             >
-              {categoryNames[cat]}
+              {catNames[cat] || cat}
             </button>
           ))}
         </div>

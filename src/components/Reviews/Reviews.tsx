@@ -1,7 +1,15 @@
-import { reviews } from '../../data/mockData';
+import { useState, useEffect } from 'react';
+import { getReviews } from '../../api/client';
+import type { Review } from '../../types';
 import styles from './Reviews.module.css';
 
 export default function Reviews() {
+  const [reviewsData, setReviewsData] = useState<Review[]>([]);
+
+  useEffect(() => {
+    getReviews().then(setReviewsData).catch(console.error);
+  }, []);
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('uk-UA', {
@@ -16,7 +24,7 @@ export default function Reviews() {
       <div className="container">
         <h2 className="section-title">Відгуки</h2>
         <div className={styles['reviews-grid']}>
-          {reviews.map((review) => (
+          {reviewsData.map((review) => (
             <div key={review.id} className={styles['review-card']}>
               <div className={styles['review-header']}>
                 <span className={styles['review-author']}>{review.author}</span>

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import Header from './components/Header/Header';
 import Hero from './components/Hero/Hero';
@@ -8,8 +8,8 @@ import Prices from './components/Prices/Prices';
 import Reviews from './components/Reviews/Reviews';
 import Footer from './components/Footer/Footer';
 import BookingModal from './components/BookingModal/BookingModal';
-import type { ServiceCategory } from './types';
-import { services } from './data/mockData';
+import type { ServiceCategory, Service } from './types';
+import { getServices } from './api/client';
 
 export default function App() {
   const [bookingOpen, setBookingOpen] = useState(false);
@@ -17,6 +17,11 @@ export default function App() {
   const [preselectedMasterId, setPreselectedMasterId] = useState<string | null>(null);
   const [preselectedCategory, setPreselectedCategory] = useState<ServiceCategory | null>(null);
   const [pricesCategory, setPricesCategory] = useState<ServiceCategory | undefined>(undefined);
+  const [allServices, setAllServices] = useState<Service[]>([]);
+
+  useEffect(() => {
+    getServices().then(setAllServices).catch(console.error);
+  }, []);
 
   const openBooking = useCallback((options?: {
     serviceId?: string;
@@ -42,12 +47,12 @@ export default function App() {
   }, []);
 
   const handleBookService = useCallback((serviceId: string) => {
-    const service = services.find((s) => s.id === serviceId);
+    const service = allServices.find((s) => s.id === serviceId);
     openBooking({
       serviceId,
-      category: service?.category,
+      category: service?.category as ServiceCategory | undefined,
     });
-  }, [openBooking]);
+  }, [openBooking, allServices]);
 
   const handleMasterClick = useCallback((masterId: string) => {
     openBooking({ masterId });

@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { MapPin, Phone, Clock, Send, Instagram } from 'lucide-react';
-import { contactInfo } from '../../data/mockData';
+import { getContactInfo } from '../../api/client';
+import type { ContactInfo } from '../../types';
 import styles from './Footer.module.css';
 
 interface FooterProps {
@@ -7,6 +9,14 @@ interface FooterProps {
 }
 
 export default function Footer({ onBookClick }: FooterProps) {
+  const [contact, setContact] = useState<ContactInfo | null>(null);
+
+  useEffect(() => {
+    getContactInfo().then(setContact).catch(console.error);
+  }, []);
+
+  if (!contact) return null;
+
   return (
     <footer id="contacts" className={styles.footer}>
       <div className="container">
@@ -23,20 +33,20 @@ export default function Footer({ onBookClick }: FooterProps) {
             <h4>Наші контакти</h4>
             <div className={styles['footer-contacts-item']}>
               <MapPin size={18} />
-              <span>{contactInfo.address}</span>
+              <span>{contact.address}</span>
             </div>
             <div className={styles['footer-contacts-item']}>
               <Phone size={18} />
-              <a href={`tel:${contactInfo.phone.replace(/\D/g, '')}`}>{contactInfo.phone}</a>
+              <a href={`tel:${contact.phone.replace(/\D/g, '')}`}>{contact.phone}</a>
             </div>
             <div className={styles['footer-contacts-item']}>
               <Clock size={18} />
-              <span>{contactInfo.schedule}</span>
+              <span>{contact.schedule}</span>
             </div>
 
             <div className={styles['footer-socials']}>
               <a
-                href={contactInfo.instagram}
+                href={contact.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles['footer-social-link']}
@@ -45,7 +55,7 @@ export default function Footer({ onBookClick }: FooterProps) {
                 <Instagram size={20} />
               </a>
               <a
-                href={contactInfo.telegram}
+                href={contact.telegram}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles['footer-social-link']}

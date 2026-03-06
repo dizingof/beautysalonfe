@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Check } from 'lucide-react';
-import { services, masters, categoryNames, generateTimeSlots } from '../../data/mockData';
-import type { ServiceCategory, BookingData } from '../../types';
+import { getServices, getMasters, getTimeSlots, getCategories, createBooking } from '../../api/client';
+import type { ServiceCategory, BookingData, Service, Master, TimeSlot } from '../../types';
 import styles from './BookingModal.module.css';
 
 interface BookingModalProps {
@@ -41,11 +41,33 @@ export default function BookingModal({
   });
   const [categoryFilter, setCategoryFilter] = useState<ServiceCategory | 'all'>('all');
   const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Data from API
+  const [allServices, setAllServices] = useState<Service[]>([]);
+  const [allMasters, setAllMasters] = useState<Master[]>([]);
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+  const [catNames, setCatNames] = useState<Record<string, string>>({});
+
+  // Load services, masters, categories on mount
+  useEffect(() => {
+    getServices().then(setAllServices).catch(console.error);
+    getMasters().then(setAllMasters).catch(console.error);
+    getCategories()
+      .then((cats) => {
+        const map: Record<string, string> = {};
+        cats.forEach((c) => (map[c.key] = c.name));
+        setCatNames(map);
+      })
+      .catch(console.error);
+  }, []);
 
   // Reset and apply preselections when modal opens
   useEffect(() => {
     if (isOpen) {
       setSuccess(false);
+      setError(null);
       setCurrentStep('service');
       setBooking({
         serviceId: preselectedServiceId || null,
@@ -77,23 +99,30 @@ export default function BookingModal({
     };
   }, [isOpen]);
 
-  const selectedService = services.find((s) => s.id === booking.serviceId);
-  const selectedMaster = masters.find((m) => m.id === booking.masterId);
+  // Fetch time slots when master+date change
+  useEffect(() => {
+    if (booking.masterId && booking.date) {
+      getTimeSlots(booking.masterId, booking.date)
+        .then(setTimeSlots)
+        .catch(console.error);
+    } else {
+      setTimeSlots([]);
+    }
+  }, [booking.masterId, booking.date]);
+
+  const selectedService = allServices.find((s) => s.id === booking.serviceId);
+  const selectedMaster = allMasters.find((m) => m.id === booking.masterId);
 
   const filteredServices = categoryFilter === 'all'
-    ? services
-    : services.filter((s) => s.category === categoryFilter);
+    ? allServices
+    : allServices.filter((s) => s.category === categoryFilter);
 
   // Filter masters by selected service category
   const availableMasters = selectedService
-    ? masters.filter((m) => m.specializations.includes(selectedService.category))
-    : masters;
+    ? allMasters.filter((m) => m.specializations.includes(selectedService.category))
+    : allMasters;
 
   const today = new Date().toISOString().split('T')[0];
-  const timeSlots = useMemo(
-    () => (booking.date ? generateTimeSlots(booking.date) : []),
-    [booking.date]
-  );
 
   const currentStepIndex = STEPS.indexOf(currentStep);
 
@@ -126,10 +155,25 @@ export default function BookingModal({
     }
   };
 
-  const handleConfirm = () => {
-    // In the future, this will call the API
-    console.log('Booking data:', booking);
-    setSuccess(true);
+  const handleConfirm = async () => {
+    if (!booking.serviceId || !booking.masterId || !booking.date || !booking.timeSlot) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      await createBooking({
+        serviceId: booking.serviceId,
+        masterId: booking.masterId,
+        date: booking.date,
+        timeSlot: booking.timeSlot,
+        clientName: booking.clientName.trim(),
+        clientPhone: booking.clientPhone.trim(),
+      });
+      setSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Помилка при створенні запису');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -178,6 +222,12 @@ export default function BookingModal({
 
               <h3 className={styles['step-title']}>{stepTitles[currentStep]}</h3>
 
+              {error && (
+                <div style={{ color: '#e74c3c', marginBottom: '12px', fontSize: '0.9rem' }}>
+                  {error}
+                </div>
+              )}
+
               {/* Step 1: Service */}
               {currentStep === 'service' && (
                 <>
@@ -194,7 +244,7 @@ export default function BookingModal({
                         className={`${styles['category-tab']} ${categoryFilter === cat ? styles.active : ''}`}
                         onClick={() => setCategoryFilter(cat)}
                       >
-                        {categoryNames[cat]}
+                        {catNames[cat] || cat}
                       </button>
                     ))}
                   </div>
@@ -264,24 +314,28 @@ export default function BookingModal({
                       <label style={{ display: 'block', fontWeight: 500, fontSize: '0.9rem', marginBottom: '8px' }}>
                         Час
                       </label>
-                      <div className={styles['time-slots-grid']}>
-                        {timeSlots.map((slot) => (
-                          <button
-                            key={slot.id}
-                            className={`${styles['time-slot']} ${
-                              booking.timeSlot === slot.time ? styles.selected : ''
-                            } ${!slot.available ? styles.disabled : ''}`}
-                            onClick={() => {
-                              if (slot.available) {
-                                setBooking((prev) => ({ ...prev, timeSlot: slot.time }));
-                              }
-                            }}
-                            disabled={!slot.available}
-                          >
-                            {slot.time}
-                          </button>
-                        ))}
-                      </div>
+                      {timeSlots.length === 0 ? (
+                        <p style={{ color: '#999', fontSize: '0.9rem' }}>Немає доступних слотів на цю дату</p>
+                      ) : (
+                        <div className={styles['time-slots-grid']}>
+                          {timeSlots.map((slot) => (
+                            <button
+                              key={slot.id}
+                              className={`${styles['time-slot']} ${
+                                booking.timeSlot === slot.time ? styles.selected : ''
+                              } ${!slot.available ? styles.disabled : ''}`}
+                              onClick={() => {
+                                if (slot.available) {
+                                  setBooking((prev) => ({ ...prev, timeSlot: slot.time }));
+                                }
+                              }}
+                              disabled={!slot.available}
+                            >
+                              {slot.time}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </>
                   )}
                 </>
@@ -357,8 +411,12 @@ export default function BookingModal({
                   </button>
                 )}
                 {currentStep === 'confirm' ? (
-                  <button className="btn btn-primary btn-lg" onClick={handleConfirm}>
-                    Підтвердити запис
+                  <button
+                    className="btn btn-primary btn-lg"
+                    onClick={handleConfirm}
+                    disabled={submitting}
+                  >
+                    {submitting ? 'Зачекайте...' : 'Підтвердити запис'}
                   </button>
                 ) : (
                   <button

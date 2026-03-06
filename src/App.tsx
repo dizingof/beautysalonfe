@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import Header from './components/Header/Header';
 import Hero from './components/Hero/Hero';
 import Services from './components/Services/Services';
@@ -76,6 +77,8 @@ export default function App() {
         preselectedMasterId={preselectedMasterId}
         preselectedCategory={preselectedCategory}
       />
+
+      <Analytics />
     </>
   );
 }

@@ -1,0 +1,94 @@
+.layout {
+  min-height: 100vh;
+  background: #f4f5f7;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: #1a1a1a;
+  color: #fff;
+  padding: 0 32px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #c9a96e;
+}
+
+.logoutBtn {
+  padding: 6px 16px;
+  background: transparent;
+  border: 1px solid #555;
+  color: #ccc;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logoutBtn:hover {
+  border-color: #c9a96e;
+  color: #c9a96e;
+}
+
+.tabs {
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  padding: 0 32px;
+  gap: 4px;
+}
+
+.tab {
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -1px;
+}
+
+.tab:hover {
+  color: #1a1a1a;
+}
+
+.tab.active {
+  color: #c9a96e;
+  border-bottom-color: #c9a96e;
+}
+
+.content {
+  flex: 1;
+  padding: 32px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .header {
+    padding: 0 16px;
+  }
+
+  .tabs {
+    padding: 0 16px;
+  }
+
+  .content {
+    padding: 16px;
+  }
+}

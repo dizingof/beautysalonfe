@@ -54,7 +54,7 @@ export default function Prices({ onBookService, initialCategory }: PricesProps) 
             <div key={service.id} className={styles['prices-row']}>
               <div className={styles['prices-row-name']}>{service.name}</div>
               <div className={styles['prices-row-duration']}>{service.duration} хв</div>
-              <div className={styles['prices-row-price']}>{service.price} грн</div>
+              <div className={styles['prices-row-price']}>{service.price} €</div>
               <div className={styles['prices-row-action']}>
                 <button
                   className="btn btn-primary btn-sm"

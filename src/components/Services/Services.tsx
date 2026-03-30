@@ -45,7 +45,7 @@ export default function Services({ onCategoryClick }: ServicesProps) {
               </div>
               <h3>{cat.name}</h3>
               <p className={styles['service-card-price']}>
-                від {cat.minPrice} грн
+                від {cat.minPrice} €
               </p>
             </div>
           ))}

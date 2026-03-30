@@ -25,7 +25,7 @@ export default function Footer({ onBookClick }: FooterProps) {
             <div className={styles['footer-logo']}>Beauty Room</div>
             <div className={styles['footer-logo-sub']}>salon</div>
             <p className={styles['footer-description']}>
-              Салон краси у серці Києва. Працюємо з любов&apos;ю до кожної деталі.
+              Салон краси у серці Варни. Працюємо з любов&apos;ю до кожної деталі.
             </p>
           </div>
 
@@ -37,7 +37,11 @@ export default function Footer({ onBookClick }: FooterProps) {
             </div>
             <div className={styles['footer-contacts-item']}>
               <Phone size={18} />
-              <a href={`tel:${contact.phone.replace(/\D/g, '')}`}>{contact.phone}</a>
+              <div className={styles['footer-phones']}>
+                {contact.phone.split('\n').map((p) => (
+                  <a key={p} href={`tel:${p.replace(/\s/g, '')}`}>{p}</a>
+                ))}
+              </div>
             </div>
             <div className={styles['footer-contacts-item']}>
               <Clock size={18} />

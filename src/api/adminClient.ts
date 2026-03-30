@@ -111,3 +111,33 @@ export async function adminUpdateService(id: string, data: ServicePayload): Prom
 export async function adminDeleteService(id: string): Promise<void> {
   return fetchAdmin<void>(`/admin/services/${id}`, { method: 'DELETE' });
 }
+
+export interface ReviewPayload {
+  author: string;
+  rating: number;
+  text: string;
+  masterId: string;
+  date?: string;
+}
+
+export async function adminGetReviews(): Promise<import('../types').Review[]> {
+  return fetchAdmin<import('../types').Review[]>('/admin/reviews');
+}
+
+export async function adminCreateReview(data: ReviewPayload): Promise<import('../types').Review> {
+  return fetchAdmin<import('../types').Review>('/admin/reviews', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function adminUpdateReview(id: string, data: ReviewPayload): Promise<void> {
+  return fetchAdmin<void>(`/admin/reviews/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function adminDeleteReview(id: string): Promise<void> {
+  return fetchAdmin<void>(`/admin/reviews/${id}`, { method: 'DELETE' });
+}

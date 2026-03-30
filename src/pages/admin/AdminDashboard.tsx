@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { clearToken } from '../../api/adminClient';
 import MastersTab from './MastersTab';
 import ServicesTab from './ServicesTab';
+import ReviewsTab from './ReviewsTab';
 import styles from './AdminDashboard.module.css';
 
-type Tab = 'masters' | 'services';
+type Tab = 'masters' | 'services' | 'reviews';
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState<Tab>('masters');
@@ -38,11 +39,18 @@ export default function AdminDashboard() {
         >
           Послуги та ціни
         </button>
+        <button
+          className={`${styles.tab} ${tab === 'reviews' ? styles.active : ''}`}
+          onClick={() => setTab('reviews')}
+        >
+          Відгуки
+        </button>
       </nav>
 
       <main className={styles.content}>
         {tab === 'masters' && <MastersTab />}
         {tab === 'services' && <ServicesTab />}
+        {tab === 'reviews' && <ReviewsTab />}
       </main>
     </div>
   );

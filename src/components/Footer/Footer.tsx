@@ -37,7 +37,11 @@ export default function Footer({ onBookClick }: FooterProps) {
             </div>
             <div className={styles['footer-contacts-item']}>
               <Phone size={18} />
-              <a href={`tel:${contact.phone.replace(/\D/g, '')}`}>{contact.phone}</a>
+              <div className={styles['footer-phones']}>
+                {contact.phone.split('\n').map((p) => (
+                  <a key={p} href={`tel:${p.replace(/\s/g, '')}`}>{p}</a>
+                ))}
+              </div>
             </div>
             <div className={styles['footer-contacts-item']}>
               <Clock size={18} />

@@ -226,7 +226,7 @@ export function generateTimeSlots(date: string): TimeSlot[] {
 
 export const contactInfo: ContactInfo = {
   address: 'м. Варна, България',
-  phone: '+380 50 593 00 73 / +359 87 762 90 87',
+  phone: '+380 50 593 00 73\n+359 87 762 90 87',
   schedule: 'ПН–СБ 9:00 — 20:00',
   telegram: 'https://t.me/antonina_space1',
   instagram: 'https://www.instagram.com/antonina_space?igsh=ODM3MTU0ZGtheXBt',

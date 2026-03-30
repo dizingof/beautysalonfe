@@ -63,7 +63,7 @@ export default function ServiceFormModal({ service, onSave, onClose }: Props) {
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>Ціна (грн) *</label>
+          <label className={styles.label}>Ціна (€) *</label>
           <input
             className={styles.input}
             type="number"

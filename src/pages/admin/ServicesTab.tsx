@@ -75,7 +75,7 @@ export default function ServicesTab() {
               <tr>
                 <th>Назва</th>
                 <th>Категорія</th>
-                <th>Ціна (грн)</th>
+                <th>Ціна (€)</th>
                 <th>Тривалість (хв)</th>
                 <th>Опис</th>
                 <th>Дії</th>
@@ -90,7 +90,7 @@ export default function ServicesTab() {
                       {CATEGORY_LABELS[s.category as string] ?? s.category}
                     </span>
                   </td>
-                  <td>{s.price} грн</td>
+                  <td>{s.price} €</td>
                   <td>{s.duration} хв</td>
                   <td>{s.description}</td>
                   <td>

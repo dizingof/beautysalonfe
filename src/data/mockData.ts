@@ -230,10 +230,6 @@ export const contactInfo: ContactInfo = {
   schedule: 'ПН–СБ 9:00 — 20:00',
   telegram: 'https://t.me/antonina_space1',
   instagram: 'https://www.instagram.com/antonina_space?igsh=ODM3MTU0ZGtheXBt',
-  phone: '+380 (67) 123-45-67',
-  schedule: 'ПН–СБ 9:00 — 20:00',
-  telegram: 'https://t.me/beautyroom_kyiv',
-  instagram: 'https://instagram.com/beautyroom_kyiv',
 };
 
 export const categoryNames: Record<string, string> = {

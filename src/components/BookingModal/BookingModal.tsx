@@ -261,7 +261,7 @@ export default function BookingModal({
                           <div className={styles['service-option-name']}>{service.name}</div>
                           <div className={styles['service-option-duration']}>{service.duration} хв</div>
                         </div>
-                        <div className={styles['service-option-price']}>{service.price} грн</div>
+                        <div className={styles['service-option-price']}>{service.price} €</div>
                       </div>
                     ))}
                   </div>
@@ -398,7 +398,7 @@ export default function BookingModal({
                   </div>
                   <div className={styles['summary-total']}>
                     <span>До сплати</span>
-                    <span>{selectedService?.price} грн</span>
+                    <span>{selectedService?.price} €</span>
                   </div>
                 </div>
               )}

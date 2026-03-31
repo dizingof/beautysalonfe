@@ -4,9 +4,10 @@ import { clearToken } from '../../api/adminClient';
 import MastersTab from './MastersTab';
 import ServicesTab from './ServicesTab';
 import ReviewsTab from './ReviewsTab';
+import BookingsTab from './BookingsTab';
 import styles from './AdminDashboard.module.css';
 
-type Tab = 'masters' | 'services' | 'reviews';
+type Tab = 'masters' | 'services' | 'reviews' | 'bookings';
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState<Tab>('masters');
@@ -45,12 +46,19 @@ export default function AdminDashboard() {
         >
           Відгуки
         </button>
+        <button
+          className={`${styles.tab} ${tab === 'bookings' ? styles.active : ''}`}
+          onClick={() => setTab('bookings')}
+        >
+          Записи
+        </button>
       </nav>
 
       <main className={styles.content}>
         {tab === 'masters' && <MastersTab />}
         {tab === 'services' && <ServicesTab />}
         {tab === 'reviews' && <ReviewsTab />}
+        {tab === 'bookings' && <BookingsTab />}
       </main>
     </div>
   );

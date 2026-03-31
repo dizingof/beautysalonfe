@@ -141,3 +141,38 @@ export async function adminUpdateReview(id: string, data: ReviewPayload): Promis
 export async function adminDeleteReview(id: string): Promise<void> {
   return fetchAdmin<void>(`/admin/reviews/${id}`, { method: 'DELETE' });
 }
+
+// ── Bookings ──
+export interface AdminBooking {
+  id: string;
+  serviceId: string;
+  serviceName: string;
+  masterId: string;
+  masterName: string;
+  date: string;
+  timeSlot: string;
+  clientName: string;
+  clientPhone: string;
+  status: string;
+  createdAt: string;
+}
+
+export async function adminGetBookings(params?: {
+  masterId?: string;
+  date?: string;
+  status?: string;
+}): Promise<AdminBooking[]> {
+  const qs = new URLSearchParams();
+  if (params?.masterId) qs.set('masterId', params.masterId);
+  if (params?.date) qs.set('date', params.date);
+  if (params?.status) qs.set('status', params.status);
+  const q = qs.toString();
+  return fetchAdmin<AdminBooking[]>(`/admin/bookings${q ? `?${q}` : ''}`);
+}
+
+export async function adminUpdateBookingStatus(id: string, status: string): Promise<void> {
+  return fetchAdmin<void>(`/admin/bookings/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}

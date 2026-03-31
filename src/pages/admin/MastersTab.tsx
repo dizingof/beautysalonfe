@@ -5,6 +5,7 @@ import {
   adminCreateMaster,
   adminUpdateMaster,
   adminDeleteMaster,
+  adminRefreshMasterSchedule,
   type MasterPayload,
 } from '../../api/adminClient';
 import MasterFormModal from './MasterFormModal';
@@ -48,6 +49,11 @@ export default function MastersTab() {
     if (!confirm(`Видалити майстра "${master.name}"?`)) return;
     await adminDeleteMaster(master.id);
     await load();
+  };
+
+  const handleRefreshSchedule = async (master: Master) => {
+    await adminRefreshMasterSchedule(master.id);
+    alert(`Розклад для ${master.name} оновлено на 30 днів`);
   };
 
   const openAdd = () => { setEditing(null); setModalOpen(true); };
@@ -101,6 +107,7 @@ export default function MastersTab() {
                   <td>{m.description}</td>
                   <td>
                     <button className={styles.btnEdit} onClick={() => openEdit(m)}>Редагувати</button>
+                    <button className={styles.btnEdit} onClick={() => handleRefreshSchedule(m)}>📅 Розклад</button>
                     <button className={styles.btnDelete} onClick={() => handleDelete(m)}>Видалити</button>
                   </td>
                 </tr>

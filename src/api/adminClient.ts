@@ -80,6 +80,10 @@ export async function adminDeleteMaster(id: string): Promise<void> {
   return fetchAdmin<void>(`/admin/masters/${id}`, { method: 'DELETE' });
 }
 
+export async function adminRefreshMasterSchedule(id: string): Promise<void> {
+  return fetchAdmin<void>(`/admin/masters/${id}/schedule`, { method: 'POST' });
+}
+
 // ── Services ──
 export async function adminGetServices(): Promise<Service[]> {
   return fetchAdmin<Service[]>('/admin/services');

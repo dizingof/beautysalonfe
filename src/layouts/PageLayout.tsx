@@ -1,24 +1,25 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/react';
+import { useState, useCallback, useEffect, type ReactNode } from 'react';
 import Header from '../components/Header/Header';
-import Hero from '../components/Hero/Hero';
-import Services from '../components/Services/Services';
-import Masters from '../components/Masters/Masters';
-import Prices from '../components/Prices/Prices';
-import Reviews from '../components/Reviews/Reviews';
 import Footer from '../components/Footer/Footer';
 import BookingModal from '../components/BookingModal/BookingModal';
 import type { ServiceCategory, Service } from '../types';
 import { getServices } from '../api/client';
 
-export default function MainSite() {
+export interface BookingActions {
+  handleBookClick: () => void;
+  handleBookService: (serviceId: string) => void;
+  handleMasterClick: (masterId: string) => void;
+}
+
+interface PageLayoutProps {
+  children: ReactNode | ((actions: BookingActions) => ReactNode);
+}
+
+export default function PageLayout({ children }: PageLayoutProps) {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [preselectedServiceId, setPreselectedServiceId] = useState<string | null>(null);
   const [preselectedMasterId, setPreselectedMasterId] = useState<string | null>(null);
   const [preselectedCategory, setPreselectedCategory] = useState<ServiceCategory | null>(null);
-  const [pricesCategory, setPricesCategory] = useState<ServiceCategory | undefined>(undefined);
   const [allServices, setAllServices] = useState<Service[]>([]);
 
   useEffect(() => {
@@ -36,51 +37,26 @@ export default function MainSite() {
     setBookingOpen(true);
   }, []);
 
-  const handleBookClick = useCallback(() => {
-    openBooking();
-  }, [openBooking]);
-
-  const handleCategoryClick = useCallback((category: ServiceCategory) => {
-    setPricesCategory(category);
-    setTimeout(() => {
-      const el = document.getElementById('prices');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-    }, 50);
-  }, []);
+  const handleBookClick = useCallback(() => openBooking(), [openBooking]);
 
   const handleBookService = useCallback((serviceId: string) => {
     const service = allServices.find((s) => s.id === serviceId);
-    openBooking({
-      serviceId,
-      category: service?.category as ServiceCategory | undefined,
-    });
+    openBooking({ serviceId, category: service?.category as ServiceCategory | undefined });
   }, [openBooking, allServices]);
 
   const handleMasterClick = useCallback((masterId: string) => {
     openBooking({ masterId });
   }, [openBooking]);
 
+  const actions: BookingActions = { handleBookClick, handleBookService, handleMasterClick };
+
   return (
     <>
-      <Helmet>
-        <title>Beauty Room — Салон краси у Варні</title>
-        <meta name="description" content="Beauty Room — салон краси у Варні, Болгарія. Професійні послуги: манікюр, педикюр, брови, вії, масаж, косметологія. Запис онлайн." />
-      </Helmet>
       <Header onBookClick={handleBookClick} />
-
       <main>
-        <Hero onBookClick={handleBookClick} />
-        <Services onCategoryClick={handleCategoryClick} />
-        <Prices
-          onBookService={handleBookService}
-          initialCategory={pricesCategory}
-        />
-        <Masters onMasterClick={handleMasterClick} />
-        <Reviews />
+        {typeof children === 'function' ? children(actions) : children}
       </main>
-
       <Footer onBookClick={handleBookClick} />
-
       <BookingModal
         isOpen={bookingOpen}
         onClose={() => setBookingOpen(false)}
@@ -88,9 +64,6 @@ export default function MainSite() {
         preselectedMasterId={preselectedMasterId}
         preselectedCategory={preselectedCategory}
       />
-
-      <Analytics />
-      <SpeedInsights />
     </>
   );
 }

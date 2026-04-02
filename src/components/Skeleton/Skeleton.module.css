@@ -1,0 +1,147 @@
+.skeleton {
+  background: linear-gradient(90deg, var(--color-bg-warm, #F5F0EB) 25%, var(--color-bg-accent, #EDE6DF) 50%, var(--color-bg-warm, #F5F0EB) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+  height: 1em;
+  margin-bottom: 0.5em;
+}
+
+.skeleton-title {
+  height: 2rem;
+  width: 60%;
+  margin: 0 auto 2rem;
+}
+
+/* Services skeleton */
+.skeleton-services-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.skeleton-service-card {
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.skeleton-service-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+.skeleton-service-name {
+  height: 1.2rem;
+  width: 70%;
+}
+
+.skeleton-service-price {
+  height: 1rem;
+  width: 40%;
+}
+
+/* Masters skeleton */
+.skeleton-masters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.skeleton-master-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.skeleton-master-photo {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}
+
+.skeleton-master-name {
+  height: 1.2rem;
+  width: 60%;
+}
+
+.skeleton-master-rating {
+  height: 1rem;
+  width: 30%;
+}
+
+.skeleton-master-tags {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.skeleton-tag {
+  height: 1.5rem;
+  width: 70px;
+  border-radius: 999px;
+}
+
+/* Reviews skeleton */
+.skeleton-reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.skeleton-review-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.skeleton-review-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.skeleton-review-author {
+  height: 1rem;
+  width: 40%;
+}
+
+.skeleton-review-date {
+  height: 1rem;
+  width: 25%;
+}
+
+.skeleton-review-stars {
+  height: 1rem;
+  width: 35%;
+}
+
+.skeleton-review-text {
+  height: 3rem;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .skeleton-services-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .skeleton-services-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { adminLogin, setToken } from '../../api/adminClient';
 import styles from './LoginPage.module.css';
 
@@ -27,6 +28,10 @@ export default function LoginPage() {
 
   return (
     <div className={styles.page}>
+      <Helmet>
+        <title>Вхід в адмін-панель — Beauty Room</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <form className={styles.card} onSubmit={handleSubmit}>
         <h1 className={styles.title}>Адмін-панель</h1>
         <p className={styles.subtitle}>Beauty Room</p>

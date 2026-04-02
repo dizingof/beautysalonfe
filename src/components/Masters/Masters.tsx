@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getMasters, getCategories } from '../../api/client';
 import type { Master } from '../../types';
+import { MastersSkeleton } from '../Skeleton/Skeleton';
 import styles from './Masters.module.css';
 
 interface MastersProps {
@@ -27,7 +28,7 @@ export default function Masters({ onMasterClick }: MastersProps) {
       <div className="container">
         <h2 className="section-title">Майстри</h2>
         <div className={styles['masters-grid']}>
-          {mastersData.map((master) => (
+          {mastersData.length === 0 ? <MastersSkeleton /> : mastersData.map((master) => (
             <div
               key={master.id}
               className={styles['master-card']}

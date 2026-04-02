@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getServices, getCategories } from '../../api/client';
 import type { ServiceCategory, Service } from '../../types';
 import styles from './Prices.module.css';
@@ -32,8 +32,39 @@ export default function Prices({ onBookService, initialCategory }: PricesProps) 
 
   const filteredServices = allServices.filter((s) => s.category === activeCategory);
 
+  const servicesJsonLd = useMemo(() => {
+    if (allServices.length === 0) return null;
+    return JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'OfferCatalog',
+      'name': 'Послуги Beauty Room',
+      'itemListElement': allServices.map((s) => ({
+        '@type': 'Offer',
+        'itemOffered': {
+          '@type': 'Service',
+          'name': s.name,
+          'description': s.description,
+          'provider': {
+            '@type': 'BeautySalon',
+            'name': 'Beauty Room',
+            'url': 'https://beautyroomvarna.space',
+          },
+        },
+        'price': s.price.toFixed(2),
+        'priceCurrency': 'EUR',
+        'availability': 'https://schema.org/InStock',
+      })),
+    });
+  }, [allServices]);
+
   return (
     <section id="prices" className={`section ${styles.prices}`}>
+      {servicesJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: servicesJsonLd }}
+        />
+      )}
       <div className="container">
         <h2 className="section-title">Ціни</h2>
 

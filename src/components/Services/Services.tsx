@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { ServiceCategory } from '../../types';
 import { getCategories } from '../../api/client';
+import { ServicesSkeleton } from '../Skeleton/Skeleton';
 import styles from './Services.module.css';
 
 const categoryIcons: Record<string, string> = {
@@ -32,7 +33,7 @@ export default function Services({ onCategoryClick }: ServicesProps) {
       <div className="container">
         <h2 className="section-title">Послуги</h2>
         <div className={styles['services-grid']}>
-          {sorted.map((cat) => (
+          {sorted.length === 0 ? <ServicesSkeleton /> : sorted.map((cat) => (
             <div
               key={cat.key}
               className={styles['service-card']}

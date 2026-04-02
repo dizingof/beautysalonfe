@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getReviews, getMasters, createReview } from '../../api/client';
 import type { Review, Master } from '../../types';
+import { ReviewsSkeleton } from '../Skeleton/Skeleton';
 import styles from './Reviews.module.css';
 
 export default function Reviews() {
@@ -44,8 +45,39 @@ export default function Reviews() {
     }
   };
 
+  const aggregateRatingJsonLd = useMemo(() => {
+    if (reviewsData.length === 0) return null;
+    const avg = reviewsData.reduce((sum, r) => sum + r.rating, 0) / reviewsData.length;
+    return JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BeautySalon',
+      'name': 'Beauty Room',
+      'url': 'https://beautyroomvarna.space',
+      'aggregateRating': {
+        '@type': 'AggregateRating',
+        'ratingValue': avg.toFixed(1),
+        'bestRating': '5',
+        'worstRating': '1',
+        'reviewCount': reviewsData.length.toString(),
+      },
+      'review': reviewsData.slice(0, 5).map((r) => ({
+        '@type': 'Review',
+        'author': { '@type': 'Person', 'name': r.author },
+        'datePublished': r.date,
+        'reviewRating': { '@type': 'Rating', 'ratingValue': r.rating.toString() },
+        'reviewBody': r.text,
+      })),
+    });
+  }, [reviewsData]);
+
   return (
     <section id="reviews" className={`section ${styles.reviews}`}>
+      {aggregateRatingJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: aggregateRatingJsonLd }}
+        />
+      )}
       <div className="container">
         <div className={styles['reviews-header']}>
           <h2 className="section-title">Відгуки</h2>
@@ -90,8 +122,8 @@ export default function Reviews() {
         )}
 
         <div className={styles['reviews-grid']}>
-          {reviewsData.map((review) => (
-            <div key={review.id} className={styles['review-card']}>
+          {reviewsData.length === 0 ? <ReviewsSkeleton /> : reviewsData.map((review) => (
+            <article key={review.id} className={styles['review-card']}>
               <div className={styles['review-header']}>
                 <span className={styles['review-author']}>{review.author}</span>
                 <span className={styles['review-date']}>{formatDate(review.date)}</span>
@@ -100,7 +132,7 @@ export default function Reviews() {
                 {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
               </div>
               <p className={styles['review-text']}>{review.text}</p>
-            </div>
+            </article>
           ))}
         </div>
       </div>

@@ -34,6 +34,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
     <!-- Structured Data: LocalBusiness -->
@@ -44,13 +45,32 @@
       "name": "Beauty Room",
       "description": "Салон краси у Варні — манікюр, педикюр, брови, вії, масаж, косметологія",
       "url": "https://beautyroomvarna.space",
+      "image": "https://beautyroomvarna.space/og-image.jpg",
       "telephone": ["+380505930073", "+35987762908"],
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Варна",
         "addressCountry": "BG"
       },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "43.2141",
+        "longitude": "27.9147"
+      },
       "openingHours": "Mo-Sa 09:00-20:00",
+      "priceRange": "€",
+      "currenciesAccepted": "EUR, BGN",
+      "paymentAccepted": "Cash, Card",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Послуги Beauty Room",
+        "itemListElement": [
+          { "@type": "OfferCatalog", "name": "Шугарінг" },
+          { "@type": "OfferCatalog", "name": "Манікюр" },
+          { "@type": "OfferCatalog", "name": "Педикюр" },
+          { "@type": "OfferCatalog", "name": "Брови та вії" }
+        ]
+      },
       "sameAs": [
         "https://www.instagram.com/antonina_space",
         "https://t.me/antonina_space1"

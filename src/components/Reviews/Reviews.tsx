@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getReviews, getMasters, createReview } from '../../api/client';
 import type { Review, Master } from '../../types';
+import { ReviewsSkeleton } from '../Skeleton/Skeleton';
 import styles from './Reviews.module.css';
 
 export default function Reviews() {
@@ -90,7 +91,7 @@ export default function Reviews() {
         )}
 
         <div className={styles['reviews-grid']}>
-          {reviewsData.map((review) => (
+          {reviewsData.length === 0 ? <ReviewsSkeleton /> : reviewsData.map((review) => (
             <article key={review.id} className={styles['review-card']}>
               <div className={styles['review-header']}>
                 <span className={styles['review-author']}>{review.author}</span>

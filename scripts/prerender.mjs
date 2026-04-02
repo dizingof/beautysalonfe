@@ -53,17 +53,56 @@ function serveStatic() {
 }
 
 const routes = [
-  { path: '/', waitFor: 'section#services', output: 'index.html' },
-  { path: '/services', waitFor: 'section#services', output: 'services.html' },
-  { path: '/masters', waitFor: 'section#masters', output: 'masters.html' },
-  { path: '/prices', waitFor: 'section#prices', output: 'prices.html' },
-  { path: '/reviews', waitFor: 'section#reviews', output: 'reviews.html' },
+  { path: '/', waitFor: '.review-card, article, section#prices .btn-sm', output: 'index.html' },
+  { path: '/services', waitFor: 'section#services h3', output: 'services.html' },
+  { path: '/masters', waitFor: 'section#masters h3', output: 'masters.html' },
+  { path: '/prices', waitFor: 'section#prices .btn-sm', output: 'prices.html' },
+  { path: '/reviews', waitFor: '.review-card, article', output: 'reviews.html' },
 ];
 
 async function renderPage(browser, baseUrl, route) {
   const page = await browser.newPage();
-  await page.goto(`${baseUrl}${route.path}`, { waitUntil: 'networkidle' });
-  await page.waitForSelector(route.waitFor, { timeout: 15000 });
+
+  // Log console errors for debugging
+  page.on('console', msg => {
+    if (msg.type() === 'error' && !msg.text().includes('CORS')) {
+      console.log(`  [console.error] ${msg.text().substring(0, 120)}`);
+    }
+  });
+
+  // Bypass CORS by intercepting API requests and fetching server-side
+  await page.route('https://beautysalon-api.fly.dev/**', async (routeObj) => {
+    const url = routeObj.request().url();
+    try {
+      const response = await fetch(url);
+      const body = await response.text();
+      await routeObj.fulfill({
+        status: response.status,
+        contentType: response.headers.get('content-type') || 'application/json',
+        body,
+      });
+    } catch (err) {
+      console.log(`  [proxy error] ${url}: ${err.message}`);
+      await routeObj.abort();
+    }
+  });
+
+  await page.goto(`${baseUrl}${route.path}`, { waitUntil: 'networkidle', timeout: 30000 });
+
+  // Wait for real data to render (not just skeletons)
+  await page.waitForFunction(
+    () => {
+      // Check for rendered content: h3 (service/master names) or article (reviews) or button.btn-sm (prices)
+      const h3s = document.querySelectorAll('main h3');
+      const articles = document.querySelectorAll('main article');
+      const priceBtns = document.querySelectorAll('main button.btn-sm');
+      return h3s.length > 0 || articles.length > 0 || priceBtns.length > 0;
+    },
+    { timeout: 30000 }
+  );
+
+  // Extra settle time for JSON-LD injection
+  await page.waitForTimeout(2000);
 
   const html = await page.evaluate(() => {
     const scripts = document.querySelectorAll('script[type="module"]');

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import Header from '../components/Header/Header';
 import Hero from '../components/Hero/Hero';
 import Services from '../components/Services/Services';
@@ -89,6 +90,7 @@ export default function MainSite() {
       />
 
       <Analytics />
+      <SpeedInsights />
     </>
   );
 }

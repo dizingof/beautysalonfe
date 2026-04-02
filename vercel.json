@@ -26,6 +26,10 @@
     { "source": "/robots.txt", "destination": "/robots.txt" },
     { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
     { "source": "/site.webmanifest", "destination": "/site.webmanifest" },
+    { "source": "/services", "destination": "/services.html" },
+    { "source": "/masters", "destination": "/masters.html" },
+    { "source": "/prices", "destination": "/prices.html" },
+    { "source": "/reviews", "destination": "/reviews.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

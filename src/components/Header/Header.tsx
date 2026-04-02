@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './Header.module.css';
 
 interface HeaderProps {
@@ -6,15 +7,17 @@ interface HeaderProps {
 }
 
 const navItems = [
-  { label: 'Послуги', href: '#services' },
-  { label: 'Майстри', href: '#masters' },
-  { label: 'Ціни', href: '#prices' },
-  { label: 'Відгуки', href: '#reviews' },
-  { label: 'Контакти', href: '#contacts' },
+  { label: 'Послуги', href: '/services', hash: '#services' },
+  { label: 'Майстри', href: '/masters', hash: '#masters' },
+  { label: 'Ціни', href: '/prices', hash: '#prices' },
+  { label: 'Відгуки', href: '/reviews', hash: '#reviews' },
+  { label: 'Контакти', href: '/#contacts', hash: '#contacts' },
 ];
 
 export default function Header({ onBookClick }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (menuOpen) {
@@ -27,16 +30,38 @@ export default function Header({ onBookClick }: HeaderProps) {
     };
   }, [menuOpen]);
 
-  const handleNavClick = (href: string) => {
+  const handleNavClick = (item: typeof navItems[0]) => {
     setMenuOpen(false);
-    const el = document.querySelector(href);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+    const isHome = location.pathname === '/';
+
+    if (isHome) {
+      // On home page — scroll to section
+      const el = document.querySelector(item.hash);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+    }
+
+    // On other pages — navigate to dedicated route
+    if (item.href === '/#contacts') {
+      navigate('/');
+      setTimeout(() => {
+        const el = document.querySelector('#contacts');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    } else {
+      navigate(item.href);
+      window.scrollTo({ top: 0 });
     }
   };
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      navigate('/');
+    }
   };
 
   return (
@@ -55,7 +80,7 @@ export default function Header({ onBookClick }: HeaderProps) {
                 className={styles['nav-link']}
                 onClick={(e) => {
                   e.preventDefault();
-                  handleNavClick(item.href);
+                  handleNavClick(item);
                 }}
                 href={item.href}
               >
@@ -92,7 +117,7 @@ export default function Header({ onBookClick }: HeaderProps) {
             className={styles['mobile-nav-link']}
             onClick={(e) => {
               e.preventDefault();
-              handleNavClick(item.href);
+              handleNavClick(item);
             }}
             href={item.href}
           >

@@ -91,7 +91,7 @@ export default function Reviews() {
 
         <div className={styles['reviews-grid']}>
           {reviewsData.map((review) => (
-            <div key={review.id} className={styles['review-card']}>
+            <article key={review.id} className={styles['review-card']}>
               <div className={styles['review-header']}>
                 <span className={styles['review-author']}>{review.author}</span>
                 <span className={styles['review-date']}>{formatDate(review.date)}</span>
@@ -100,7 +100,7 @@ export default function Reviews() {
                 {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
               </div>
               <p className={styles['review-text']}>{review.text}</p>
-            </div>
+            </article>
           ))}
         </div>
       </div>

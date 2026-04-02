@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Analytics } from '@vercel/analytics/react';
 import Header from '../components/Header/Header';
 import Hero from '../components/Hero/Hero';
@@ -60,6 +61,10 @@ export default function MainSite() {
 
   return (
     <>
+      <Helmet>
+        <title>Beauty Room — Салон краси у Варні</title>
+        <meta name="description" content="Beauty Room — салон краси у Варні, Болгарія. Професійні послуги: манікюр, педикюр, брови, вії, масаж, косметологія. Запис онлайн." />
+      </Helmet>
       <Header onBookClick={handleBookClick} />
 
       <main>

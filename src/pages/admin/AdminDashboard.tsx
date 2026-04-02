@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { clearToken } from '../../api/adminClient';
 import MastersTab from './MastersTab';
 import ServicesTab from './ServicesTab';
@@ -20,6 +21,10 @@ export default function AdminDashboard() {
 
   return (
     <div className={styles.layout}>
+      <Helmet>
+        <title>Адмін-панель — Beauty Room</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <header className={styles.header}>
         <span className={styles.logo}>Beauty Room — Адмін</span>
         <button className={styles.logoutBtn} onClick={handleLogout}>

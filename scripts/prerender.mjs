@@ -1,14 +1,17 @@
 /**
  * Post-build prerender script.
- * Opens dist/index.html in headless Chromium via Playwright,
+ * Opens built pages in headless Chromium via Playwright,
  * waits for React to render content from the API,
- * and saves the fully rendered HTML back to dist/index.html.
+ * and saves the fully rendered HTML.
+ *
+ * Graceful: if Playwright or Chromium is unavailable, the build
+ * continues with the original SPA HTML (no prerender).
  */
-import { chromium } from 'playwright';
 import { createServer } from 'http';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, extname, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = join(__dirname, '..', 'dist');
@@ -26,7 +29,6 @@ const mimeTypes = {
   '.webmanifest': 'application/manifest+json',
 };
 
-// Serve dist/ on a random port
 function serveStatic() {
   return new Promise((resolve) => {
     const server = createServer((req, res) => {
@@ -46,29 +48,21 @@ function serveStatic() {
       }
     });
     server.listen(0, '127.0.0.1', () => {
-      const port = server.address().port;
-      resolve({ server, port });
+      resolve({ server, port: server.address().port });
     });
   });
 }
 
 const routes = [
-  { path: '/', waitFor: '.review-card, article, section#prices .btn-sm', output: 'index.html' },
-  { path: '/services', waitFor: 'section#services h3', output: 'services.html' },
-  { path: '/masters', waitFor: 'section#masters h3', output: 'masters.html' },
-  { path: '/prices', waitFor: 'section#prices .btn-sm', output: 'prices.html' },
-  { path: '/reviews', waitFor: '.review-card, article', output: 'reviews.html' },
+  { path: '/', output: 'index.html' },
+  { path: '/services', output: 'services.html' },
+  { path: '/masters', output: 'masters.html' },
+  { path: '/prices', output: 'prices.html' },
+  { path: '/reviews', output: 'reviews.html' },
 ];
 
 async function renderPage(browser, baseUrl, route) {
   const page = await browser.newPage();
-
-  // Log console errors for debugging
-  page.on('console', msg => {
-    if (msg.type() === 'error' && !msg.text().includes('CORS')) {
-      console.log(`  [console.error] ${msg.text().substring(0, 120)}`);
-    }
-  });
 
   // Bypass CORS by intercepting API requests and fetching server-side
   await page.route('https://beautysalon-api.fly.dev/**', async (routeObj) => {
@@ -82,7 +76,7 @@ async function renderPage(browser, baseUrl, route) {
         body,
       });
     } catch (err) {
-      console.log(`  [proxy error] ${url}: ${err.message}`);
+      console.log(`  ⚠ proxy error ${url}: ${err.message}`);
       await routeObj.abort();
     }
   });
@@ -92,7 +86,6 @@ async function renderPage(browser, baseUrl, route) {
   // Wait for real data to render (not just skeletons)
   await page.waitForFunction(
     () => {
-      // Check for rendered content: h3 (service/master names) or article (reviews) or button.btn-sm (prices)
       const h3s = document.querySelectorAll('main h3');
       const articles = document.querySelectorAll('main article');
       const priceBtns = document.querySelectorAll('main button.btn-sm');
@@ -101,7 +94,7 @@ async function renderPage(browser, baseUrl, route) {
     { timeout: 30000 }
   );
 
-  // Extra settle time for JSON-LD injection
+  // Settle time for JSON-LD injection
   await page.waitForTimeout(2000);
 
   const html = await page.evaluate(() => {
@@ -126,28 +119,48 @@ async function renderPage(browser, baseUrl, route) {
 }
 
 async function prerender() {
-  console.log('🔄 Starting prerender...');
+  // Ensure Chromium is installed
+  console.log('🔄 Ensuring Chromium is available...');
+  try {
+    execSync('npx playwright install chromium', { stdio: 'inherit' });
+  } catch {
+    console.warn('⚠ Could not install Chromium. Skipping prerender.');
+    return;
+  }
 
+  const { chromium } = await import('playwright');
+
+  console.log('🔄 Starting prerender...');
   const { server, port } = await serveStatic();
   const baseUrl = `http://127.0.0.1:${port}`;
 
-  const browser = await chromium.launch({ headless: true });
+  let browser;
+  try {
+    browser = await chromium.launch({ headless: true });
+  } catch (err) {
+    console.warn(`⚠ Could not launch Chromium: ${err.message}. Skipping prerender.`);
+    server.close();
+    return;
+  }
 
   for (const route of routes) {
-    const html = await renderPage(browser, baseUrl, route);
-    const outPath = join(distDir, route.output);
-    writeFileSync(outPath, html, 'utf-8');
-    const sizeKB = (Buffer.byteLength(html, 'utf-8') / 1024).toFixed(1);
-    console.log(`  ✅ ${route.path} → ${route.output} (${sizeKB} KB)`);
+    try {
+      const html = await renderPage(browser, baseUrl, route);
+      const outPath = join(distDir, route.output);
+      writeFileSync(outPath, html, 'utf-8');
+      const sizeKB = (Buffer.byteLength(html, 'utf-8') / 1024).toFixed(1);
+      console.log(`  ✅ ${route.path} → ${route.output} (${sizeKB} KB)`);
+    } catch (err) {
+      console.warn(`  ⚠ Failed to prerender ${route.path}: ${err.message}`);
+    }
   }
 
   await browser.close();
   server.close();
-
-  console.log(`✅ Prerendered ${routes.length} pages`);
+  console.log('✅ Prerender complete');
 }
 
+// Graceful: never fail the build
 prerender().catch((err) => {
-  console.error('❌ Prerender failed:', err.message);
-  process.exit(1);
+  console.warn(`⚠ Prerender skipped: ${err.message}`);
 });

@@ -60,6 +60,7 @@ export interface MasterPayload {
   experience: string;
   description: string;
   specializations: string[];
+  email?: string;
 }
 
 export async function adminCreateMaster(data: MasterPayload): Promise<Master> {
@@ -157,6 +158,7 @@ export interface AdminBooking {
   timeSlot: string;
   clientName: string;
   clientPhone: string;
+  clientEmail?: string;
   status: string;
   createdAt: string;
 }

@@ -47,6 +47,7 @@ export async function createBooking(data: {
   timeSlot: string;
   clientName: string;
   clientPhone: string;
+  clientEmail?: string;
 }) {
   return fetchJson<{ id: string }>(`${API_BASE}/bookings`, {
     method: 'POST',

@@ -38,6 +38,7 @@ export default function BookingModal({
     timeSlot: null,
     clientName: '',
     clientPhone: '',
+    clientEmail: '',
   });
   const [categoryFilter, setCategoryFilter] = useState<ServiceCategory | 'all'>('all');
   const [success, setSuccess] = useState(false);
@@ -76,6 +77,7 @@ export default function BookingModal({
         timeSlot: null,
         clientName: '',
         clientPhone: '',
+        clientEmail: '',
       });
       setCategoryFilter(preselectedCategory || 'all');
 
@@ -167,6 +169,7 @@ export default function BookingModal({
         timeSlot: booking.timeSlot,
         clientName: booking.clientName.trim(),
         clientPhone: booking.clientPhone.trim(),
+        clientEmail: booking.clientEmail.trim() || undefined,
       });
       setSuccess(true);
     } catch (err) {
@@ -200,7 +203,9 @@ export default function BookingModal({
               <p className={styles['success-text']}>
                 {selectedService?.name} у майстра {selectedMaster?.name}<br />
                 {booking.date} о {booking.timeSlot}<br /><br />
-                Ми надішлемо підтвердження на ваш телефон.
+                {booking.clientEmail
+                  ? 'Підтвердження надіслано на ваш email.'
+                  : 'Ми зв\'яжемось з вами для підтвердження.'}
               </p>
               <button className="btn btn-primary btn-lg" onClick={onClose}>
                 Чудово!
@@ -366,6 +371,17 @@ export default function BookingModal({
                       }
                     />
                   </div>
+                  <div className={styles['form-group']}>
+                    <label>Email <span style={{ color: '#999', fontWeight: 400 }}>(для підтвердження запису)</span></label>
+                    <input
+                      type="email"
+                      placeholder="example@gmail.com"
+                      value={booking.clientEmail}
+                      onChange={(e) =>
+                        setBooking((prev) => ({ ...prev, clientEmail: e.target.value }))
+                      }
+                    />
+                  </div>
                 </>
               )}
 
@@ -396,6 +412,12 @@ export default function BookingModal({
                     <span className={styles['summary-label']}>Телефон</span>
                     <span className={styles['summary-value']}>{booking.clientPhone}</span>
                   </div>
+                  {booking.clientEmail && (
+                    <div className={styles['summary-item']}>
+                      <span className={styles['summary-label']}>Email</span>
+                      <span className={styles['summary-value']}>{booking.clientEmail}</span>
+                    </div>
+                  )}
                   <div className={styles['summary-total']}>
                     <span>До сплати</span>
                     <span>{selectedService?.price} €</span>

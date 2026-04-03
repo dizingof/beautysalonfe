@@ -19,6 +19,7 @@ export interface Master {
   specializations: ServiceCategory[];
   experience: string;
   description: string;
+  email?: string;
 }
 
 export interface TimeSlot {
@@ -43,6 +44,7 @@ export interface BookingData {
   timeSlot: string | null;
   clientName: string;
   clientPhone: string;
+  clientEmail: string;
 }
 
 export interface ContactInfo {

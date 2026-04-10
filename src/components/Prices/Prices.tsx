@@ -12,16 +12,12 @@ export default function Prices({ onBookService, initialCategory }: PricesProps) 
   const [activeCategory, setActiveCategory] = useState<ServiceCategory>(initialCategory || '');
   const [allServices, setAllServices] = useState<Service[]>([]);
   const [catList, setCatList] = useState<{ key: string; name: string }[]>([]);
-  const [catNames, setCatNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
     getServices().then(setAllServices).catch(console.error);
     getCategories()
       .then((cats) => {
         setCatList(cats);
-        const map: Record<string, string> = {};
-        cats.forEach((c) => (map[c.key] = c.name));
-        setCatNames(map);
         if (!initialCategory && cats.length > 0) setActiveCategory(cats[0].key);
       })
       .catch(console.error);

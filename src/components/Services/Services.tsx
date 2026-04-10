@@ -9,7 +9,7 @@ interface ServicesProps {
 }
 
 export default function Services({ onCategoryClick }: ServicesProps) {
-  const [categories, setCategories] = useState<{ key: string; name: string; minPrice: number }[]>([]);
+  const [categories, setCategories] = useState<{ key: string; name: string; emoji?: string; minPrice: number }[]>([]);
 
   useEffect(() => {
     getCategories().then(setCategories).catch(console.error);
@@ -28,7 +28,7 @@ export default function Services({ onCategoryClick }: ServicesProps) {
             >
               <div className={styles['service-card-image']}>
                 <div className={`${styles['service-card-placeholder']} ${styles[cat.key]}`}>
-                  {cat.key}
+                  {cat.emoji || cat.key}
                 </div>
               </div>
               <h3>{cat.name}</h3>

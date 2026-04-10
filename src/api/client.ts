@@ -75,7 +75,7 @@ export async function createReview(data: {
 
 // ── Categories ──
 export async function getCategories() {
-  return fetchJson<{ key: string; name: string; minPrice: number }[]>(
+  return fetchJson<{ key: string; name: string; emoji?: string; minPrice: number }[]>(
     `${API_BASE}/categories`
   );
 }

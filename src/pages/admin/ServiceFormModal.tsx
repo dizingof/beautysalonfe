@@ -1,14 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Service } from '../../types';
 import type { ServicePayload } from '../../api/adminClient';
+import { adminGetCategories, type AdminCategory } from '../../api/adminClient';
 import styles from './FormModal.module.css';
-
-const CATEGORIES = [
-  { value: 'Sugaring', label: 'Шугарінг' },
-  { value: 'Manicure', label: 'Манікюр' },
-  { value: 'Pedicure', label: 'Педикюр' },
-  { value: 'Brows', label: 'Брови' },
-];
 
 interface Props {
   service: Service | null;
@@ -17,14 +11,24 @@ interface Props {
 }
 
 export default function ServiceFormModal({ service, onSave, onClose }: Props) {
+  const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [name, setName] = useState(service?.name ?? '');
-  const [category, setCategory] = useState(service?.category as string ?? 'Manicure');
+  const [category, setCategory] = useState(service?.category as string ?? '');
   const [price, setPrice] = useState(service?.price ?? 0);
   const [duration, setDuration] = useState(service?.duration ?? 60);
   const [description, setDescription] = useState(service?.description ?? '');
   const [image, setImage] = useState(service?.image ?? '');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    adminGetCategories().then((cats) => {
+      setCategories(cats);
+      if (!service && cats.length > 0 && !category) {
+        setCategory(cats[0].key);
+      }
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,8 +60,8 @@ export default function ServiceFormModal({ service, onSave, onClose }: Props) {
         <div className={styles.field}>
           <label className={styles.label}>Категорія</label>
           <select className={styles.select} value={category} onChange={(e) => setCategory(e.target.value)}>
-            {CATEGORIES.map((c) => (
-              <option key={c.value} value={c.value}>{c.label}</option>
+            {categories.map((c) => (
+              <option key={c.key} value={c.key}>{c.emoji} {c.name}</option>
             ))}
           </select>
         </div>

@@ -1,14 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Master } from '../../types';
 import type { MasterPayload } from '../../api/adminClient';
+import { adminGetCategories, type AdminCategory } from '../../api/adminClient';
 import styles from './FormModal.module.css';
-
-const CATEGORIES = [
-  { value: 'Sugaring', label: 'Шугарінг' },
-  { value: 'Manicure', label: 'Манікюр' },
-  { value: 'Pedicure', label: 'Педикюр' },
-  { value: 'Brows', label: 'Брови' },
-];
 
 interface Props {
   master: Master | null;
@@ -17,6 +11,7 @@ interface Props {
 }
 
 export default function MasterFormModal({ master, onSave, onClose }: Props) {
+  const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [name, setName] = useState(master?.name ?? '');
   const [photo, setPhoto] = useState(master?.photo ?? '');
   const [experience, setExperience] = useState(master?.experience ?? '');
@@ -26,6 +21,10 @@ export default function MasterFormModal({ master, onSave, onClose }: Props) {
   );
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    adminGetCategories().then(setCategories);
+  }, []);
 
   const toggleSpec = (value: string) => {
     setSpecializations((prev) =>
@@ -77,14 +76,14 @@ export default function MasterFormModal({ master, onSave, onClose }: Props) {
         <div className={styles.field}>
           <label className={styles.label}>Спеціалізації</label>
           <div className={styles.checkboxGroup}>
-            {CATEGORIES.map((cat) => (
-              <label key={cat.value} className={styles.checkboxLabel}>
+            {categories.map((cat) => (
+              <label key={cat.key} className={styles.checkboxLabel}>
                 <input
                   type="checkbox"
-                  checked={specializations.includes(cat.value)}
-                  onChange={() => toggleSpec(cat.value)}
+                  checked={specializations.includes(cat.key)}
+                  onChange={() => toggleSpec(cat.key)}
                 />
-                {cat.label}
+                {cat.emoji} {cat.name}
               </label>
             ))}
           </div>

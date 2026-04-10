@@ -49,6 +49,7 @@ export default function BookingModal({
   const [allMasters, setAllMasters] = useState<Master[]>([]);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [catNames, setCatNames] = useState<Record<string, string>>({});
+  const [catKeys, setCatKeys] = useState<string[]>([]);
 
   // Load services, masters, categories on mount
   useEffect(() => {
@@ -59,6 +60,7 @@ export default function BookingModal({
         const map: Record<string, string> = {};
         cats.forEach((c) => (map[c.key] = c.name));
         setCatNames(map);
+        setCatKeys(cats.map((c) => c.key));
       })
       .catch(console.error);
   }, []);
@@ -103,7 +105,22 @@ export default function BookingModal({
   useEffect(() => {
     if (booking.masterId && booking.date) {
       getTimeSlots(booking.masterId, booking.date)
-        .then(setTimeSlots)
+        .then((slots) => {
+          // Hide past time slots for today (client-side safety net)
+          const now = new Date();
+          const todayStr = now.toISOString().split('T')[0];
+          if (booking.date === todayStr) {
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            setTimeSlots(
+              slots.map((s) => {
+                const [h, m] = s.time.split(':').map(Number);
+                return h * 60 + m <= currentMinutes ? { ...s, available: false } : s;
+              })
+            );
+          } else {
+            setTimeSlots(slots);
+          }
+        })
         .catch(console.error);
     } else {
       setTimeSlots([]);
@@ -123,6 +140,11 @@ export default function BookingModal({
     : allMasters;
 
   const today = new Date().toISOString().split('T')[0];
+
+  const formatDate = (iso: string) => {
+    const [y, m, d] = iso.split('-');
+    return `${d}.${m}.${y}`;
+  };
 
   const currentStepIndex = STEPS.indexOf(currentStep);
 
@@ -199,8 +221,10 @@ export default function BookingModal({
               <h3 className={styles['success-title']}>Ви записані!</h3>
               <p className={styles['success-text']}>
                 {selectedService?.name} у майстра {selectedMaster?.name}<br />
-                {booking.date} о {booking.timeSlot}<br /><br />
-                Ми надішлемо підтвердження на ваш телефон.
+                {formatDate(booking.date!)} о {booking.timeSlot}<br /><br />
+                {booking.clientEmail
+                  ? 'Підтвердження надіслано на ваш email.'
+                  : 'Ми зв\'яжемось з вами для підтвердження.'}
               </p>
               <button className="btn btn-primary btn-lg" onClick={onClose}>
                 Чудово!
@@ -238,7 +262,7 @@ export default function BookingModal({
                     >
                       Усі
                     </button>
-                    {(['sugaring', 'manicure', 'pedicure', 'brows'] as ServiceCategory[]).map((cat) => (
+                    {catKeys.map((cat) => (
                       <button
                         key={cat}
                         className={`${styles['category-tab']} ${categoryFilter === cat ? styles.active : ''}`}
@@ -315,7 +339,7 @@ export default function BookingModal({
                         Час
                       </label>
                       {timeSlots.length === 0 ? (
-                        <p style={{ color: '#999', fontSize: '0.9rem' }}>Немає доступних слотів на цю дату</p>
+                        <p style={{ color: '#999', fontSize: '0.9rem' }}>Немає вільних вікон на цю дату</p>
                       ) : (
                         <div className={styles['time-slots-grid']}>
                           {timeSlots.map((slot) => (
@@ -382,7 +406,7 @@ export default function BookingModal({
                   </div>
                   <div className={styles['summary-item']}>
                     <span className={styles['summary-label']}>Дата</span>
-                    <span className={styles['summary-value']}>{booking.date}</span>
+                    <span className={styles['summary-value']}>{booking.date ? formatDate(booking.date) : ''}</span>
                   </div>
                   <div className={styles['summary-item']}>
                     <span className={styles['summary-label']}>Час</span>

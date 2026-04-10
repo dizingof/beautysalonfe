@@ -4,29 +4,29 @@ import {
   adminGetMasters,
   adminCreateMaster,
   adminUpdateMaster,
-  adminDeleteMaster,
+  adminToggleMaster,
   adminRefreshMasterSchedule,
+  adminGetCategories,
   type MasterPayload,
+  type AdminCategory,
 } from '../../api/adminClient';
 import MasterFormModal from './MasterFormModal';
 import styles from './TabTable.module.css';
 
-const CATEGORY_LABELS: Record<string, string> = {
-  Sugaring: 'Шугарінг',
-  Manicure: 'Манікюр',
-  Pedicure: 'Педикюр',
-  Brows: 'Брови',
-};
-
 export default function MastersTab() {
   const [masters, setMasters] = useState<Master[]>([]);
+  const [categories, setCategories] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Master | null>(null);
 
   const load = async () => {
     try {
-      setMasters(await adminGetMasters());
+      const [msts, cats] = await Promise.all([adminGetMasters(), adminGetCategories()]);
+      setMasters(msts);
+      const labels: Record<string, string> = {};
+      cats.forEach((c: AdminCategory) => { labels[c.key] = `${c.emoji} ${c.name}`; labels[c.key.toLowerCase()] = `${c.emoji} ${c.name}`; });
+      setCategories(labels);
     } finally {
       setLoading(false);
     }
@@ -45,10 +45,13 @@ export default function MastersTab() {
     setEditing(null);
   };
 
-  const handleDelete = async (master: Master) => {
-    if (!confirm(`Видалити майстра "${master.name}"?`)) return;
-    await adminDeleteMaster(master.id);
-    await load();
+  const handleToggle = async (master: Master) => {
+    try {
+      await adminToggleMaster(master.id);
+      await load();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Помилка');
+    }
   };
 
   const handleRefreshSchedule = async (master: Master) => {
@@ -79,13 +82,13 @@ export default function MastersTab() {
                 <th>Ім'я</th>
                 <th>Досвід</th>
                 <th>Спеціалізації</th>
-                <th>Опис</th>
+                <th>Статус</th>
                 <th>Дії</th>
               </tr>
             </thead>
             <tbody>
               {masters.map((m) => (
-                <tr key={m.id}>
+                <tr key={m.id} style={{ opacity: m.isActive === false ? 0.5 : 1 }}>
                   <td>
                     {m.photo ? (
                       <img className={styles.photo} src={m.photo} alt={m.name} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -99,16 +102,25 @@ export default function MastersTab() {
                     <div className={styles.tags}>
                       {m.specializations.map((s) => (
                         <span key={s} className={styles.tag}>
-                          {CATEGORY_LABELS[s] ?? s}
+                          {categories[s] ?? s}
                         </span>
                       ))}
                     </div>
                   </td>
-                  <td>{m.description}</td>
+                  <td>
+                    <span style={{ color: m.isActive !== false ? '#27ae60' : '#e74c3c', fontWeight: 600 }}>
+                      {m.isActive !== false ? '✅ Активний' : '⛔ Неактивний'}
+                    </span>
+                  </td>
                   <td>
                     <button className={styles.btnEdit} onClick={() => openEdit(m)}>Редагувати</button>
                     <button className={styles.btnEdit} onClick={() => handleRefreshSchedule(m)}>📅 Розклад</button>
-                    <button className={styles.btnDelete} onClick={() => handleDelete(m)}>Видалити</button>
+                    <button
+                      className={m.isActive !== false ? styles.btnDelete : styles.btnEdit}
+                      onClick={() => handleToggle(m)}
+                    >
+                      {m.isActive !== false ? 'Деактивувати' : 'Активувати'}
+                    </button>
                   </td>
                 </tr>
               ))}

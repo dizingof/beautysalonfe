@@ -76,8 +76,8 @@ export async function adminUpdateMaster(id: string, data: MasterPayload): Promis
   });
 }
 
-export async function adminDeleteMaster(id: string): Promise<void> {
-  return fetchAdmin<void>(`/admin/masters/${id}`, { method: 'DELETE' });
+export async function adminToggleMaster(id: string): Promise<{ isActive: boolean }> {
+  return fetchAdmin<{ isActive: boolean }>(`/admin/masters/${id}`, { method: 'DELETE' });
 }
 
 export async function adminRefreshMasterSchedule(id: string): Promise<void> {
@@ -112,8 +112,8 @@ export async function adminUpdateService(id: string, data: ServicePayload): Prom
   });
 }
 
-export async function adminDeleteService(id: string): Promise<void> {
-  return fetchAdmin<void>(`/admin/services/${id}`, { method: 'DELETE' });
+export async function adminToggleService(id: string): Promise<{ isActive: boolean }> {
+  return fetchAdmin<{ isActive: boolean }>(`/admin/services/${id}`, { method: 'DELETE' });
 }
 
 export interface ReviewPayload {
@@ -179,4 +179,43 @@ export async function adminUpdateBookingStatus(id: string, status: string): Prom
     method: 'PATCH',
     body: JSON.stringify({ status }),
   });
+}
+
+// ── Categories ──
+export interface AdminCategory {
+  id: string;
+  key: string;
+  name: string;
+  emoji: string;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+export interface CategoryPayload {
+  key: string;
+  name: string;
+  emoji?: string;
+  sortOrder?: number;
+}
+
+export async function adminGetCategories(): Promise<AdminCategory[]> {
+  return fetchAdmin<AdminCategory[]>('/admin/categories');
+}
+
+export async function adminCreateCategory(data: CategoryPayload): Promise<AdminCategory> {
+  return fetchAdmin<AdminCategory>('/admin/categories', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function adminUpdateCategory(id: string, data: CategoryPayload): Promise<void> {
+  return fetchAdmin<void>(`/admin/categories/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function adminToggleCategory(id: string): Promise<{ isActive: boolean }> {
+  return fetchAdmin<{ isActive: boolean }>(`/admin/categories/${id}`, { method: 'DELETE' });
 }

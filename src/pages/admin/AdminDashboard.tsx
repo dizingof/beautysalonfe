@@ -4,11 +4,12 @@ import { Helmet } from 'react-helmet-async';
 import { clearToken } from '../../api/adminClient';
 import MastersTab from './MastersTab';
 import ServicesTab from './ServicesTab';
+import CategoriesTab from './CategoriesTab';
 import ReviewsTab from './ReviewsTab';
 import BookingsTab from './BookingsTab';
 import styles from './AdminDashboard.module.css';
 
-type Tab = 'masters' | 'services' | 'reviews' | 'bookings';
+type Tab = 'masters' | 'services' | 'categories' | 'reviews' | 'bookings';
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState<Tab>('masters');
@@ -46,6 +47,12 @@ export default function AdminDashboard() {
           Послуги та ціни
         </button>
         <button
+          className={`${styles.tab} ${tab === 'categories' ? styles.active : ''}`}
+          onClick={() => setTab('categories')}
+        >
+          Категорії
+        </button>
+        <button
           className={`${styles.tab} ${tab === 'reviews' ? styles.active : ''}`}
           onClick={() => setTab('reviews')}
         >
@@ -62,6 +69,7 @@ export default function AdminDashboard() {
       <main className={styles.content}>
         {tab === 'masters' && <MastersTab />}
         {tab === 'services' && <ServicesTab />}
+        {tab === 'categories' && <CategoriesTab />}
         {tab === 'reviews' && <ReviewsTab />}
         {tab === 'bookings' && <BookingsTab />}
       </main>

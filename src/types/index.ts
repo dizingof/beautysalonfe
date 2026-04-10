@@ -6,9 +6,10 @@ export interface Service {
   duration: number; // minutes
   description: string;
   image: string;
+  isActive?: boolean;
 }
 
-export type ServiceCategory = 'sugaring' | 'manicure' | 'pedicure' | 'brows';
+export type ServiceCategory = string;
 
 export interface Master {
   id: string;
@@ -19,6 +20,8 @@ export interface Master {
   specializations: ServiceCategory[];
   experience: string;
   description: string;
+  email?: string;
+  isActive?: boolean;
 }
 
 export interface TimeSlot {

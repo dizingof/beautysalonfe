@@ -4,28 +4,28 @@ import {
   adminGetServices,
   adminCreateService,
   adminUpdateService,
-  adminDeleteService,
+  adminToggleService,
+  adminGetCategories,
   type ServicePayload,
+  type AdminCategory,
 } from '../../api/adminClient';
 import ServiceFormModal from './ServiceFormModal';
 import styles from './TabTable.module.css';
 
-const CATEGORY_LABELS: Record<string, string> = {
-  Sugaring: 'Шугарінг',
-  Manicure: 'Манікюр',
-  Pedicure: 'Педикюр',
-  Brows: 'Брови',
-};
-
 export default function ServicesTab() {
   const [services, setServices] = useState<Service[]>([]);
+  const [categories, setCategories] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Service | null>(null);
 
   const load = async () => {
     try {
-      setServices(await adminGetServices());
+      const [svcs, cats] = await Promise.all([adminGetServices(), adminGetCategories()]);
+      setServices(svcs);
+      const labels: Record<string, string> = {};
+      cats.forEach((c: AdminCategory) => { labels[c.key] = `${c.emoji} ${c.name}`; labels[c.key.toLowerCase()] = `${c.emoji} ${c.name}`; });
+      setCategories(labels);
     } finally {
       setLoading(false);
     }
@@ -44,13 +44,12 @@ export default function ServicesTab() {
     setEditing(null);
   };
 
-  const handleDelete = async (service: Service) => {
-    if (!confirm(`Видалити послугу "${service.name}"?`)) return;
+  const handleToggle = async (service: Service) => {
     try {
-      await adminDeleteService(service.id);
+      await adminToggleService(service.id);
       await load();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Помилка видалення');
+      alert(err instanceof Error ? err.message : 'Помилка');
     }
   };
 
@@ -77,25 +76,34 @@ export default function ServicesTab() {
                 <th>Категорія</th>
                 <th>Ціна (€)</th>
                 <th>Тривалість (хв)</th>
-                <th>Опис</th>
+                <th>Статус</th>
                 <th>Дії</th>
               </tr>
             </thead>
             <tbody>
               {services.map((s) => (
-                <tr key={s.id}>
+                <tr key={s.id} style={{ opacity: s.isActive === false ? 0.5 : 1 }}>
                   <td><strong>{s.name}</strong></td>
                   <td>
                     <span className={styles.tag}>
-                      {CATEGORY_LABELS[s.category as string] ?? s.category}
+                      {categories[s.category as string] ?? s.category}
                     </span>
                   </td>
                   <td>{s.price} €</td>
                   <td>{s.duration} хв</td>
-                  <td>{s.description}</td>
+                  <td>
+                    <span style={{ color: s.isActive !== false ? '#27ae60' : '#e74c3c', fontWeight: 600 }}>
+                      {s.isActive !== false ? '✅ Активна' : '⛔ Неактивна'}
+                    </span>
+                  </td>
                   <td>
                     <button className={styles.btnEdit} onClick={() => openEdit(s)}>Редагувати</button>
-                    <button className={styles.btnDelete} onClick={() => handleDelete(s)}>Видалити</button>
+                    <button
+                      className={s.isActive !== false ? styles.btnDelete : styles.btnEdit}
+                      onClick={() => handleToggle(s)}
+                    >
+                      {s.isActive !== false ? 'Деактивувати' : 'Активувати'}
+                    </button>
                   </td>
                 </tr>
               ))}

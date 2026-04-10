@@ -3,25 +3,26 @@ import { getServices, getCategories } from '../../api/client';
 import type { ServiceCategory, Service } from '../../types';
 import styles from './Prices.module.css';
 
-const categoryOrder: ServiceCategory[] = ['sugaring', 'manicure', 'pedicure', 'brows'];
-
 interface PricesProps {
   onBookService: (serviceId: string) => void;
   initialCategory?: ServiceCategory;
 }
 
 export default function Prices({ onBookService, initialCategory }: PricesProps) {
-  const [activeCategory, setActiveCategory] = useState<ServiceCategory>(initialCategory || 'sugaring');
+  const [activeCategory, setActiveCategory] = useState<ServiceCategory>(initialCategory || '');
   const [allServices, setAllServices] = useState<Service[]>([]);
+  const [catList, setCatList] = useState<{ key: string; name: string }[]>([]);
   const [catNames, setCatNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
     getServices().then(setAllServices).catch(console.error);
     getCategories()
       .then((cats) => {
+        setCatList(cats);
         const map: Record<string, string> = {};
         cats.forEach((c) => (map[c.key] = c.name));
         setCatNames(map);
+        if (!initialCategory && cats.length > 0) setActiveCategory(cats[0].key);
       })
       .catch(console.error);
   }, []);
@@ -69,13 +70,13 @@ export default function Prices({ onBookService, initialCategory }: PricesProps) 
         <h2 className="section-title">Ціни</h2>
 
         <div className={styles['prices-tabs']}>
-          {categoryOrder.map((cat) => (
+          {catList.map((cat) => (
             <button
-              key={cat}
-              className={`${styles['prices-tab']} ${activeCategory === cat ? styles.active : ''}`}
-              onClick={() => setActiveCategory(cat)}
+              key={cat.key}
+              className={`${styles['prices-tab']} ${activeCategory === cat.key ? styles.active : ''}`}
+              onClick={() => setActiveCategory(cat.key)}
             >
-              {catNames[cat] || cat}
+              {cat.name}
             </button>
           ))}
         </div>

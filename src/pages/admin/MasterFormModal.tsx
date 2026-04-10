@@ -16,6 +16,7 @@ export default function MasterFormModal({ master, onSave, onClose }: Props) {
   const [photo, setPhoto] = useState(master?.photo ?? '');
   const [experience, setExperience] = useState(master?.experience ?? '');
   const [description, setDescription] = useState(master?.description ?? '');
+  const [email, setEmail] = useState(master?.email ?? '');
   const [specializations, setSpecializations] = useState<string[]>(
     master?.specializations as string[] ?? []
   );
@@ -38,7 +39,7 @@ export default function MasterFormModal({ master, onSave, onClose }: Props) {
     setError('');
     setSaving(true);
     try {
-      await onSave({ name, photo, experience, description, specializations });
+      await onSave({ name, photo, experience, description, specializations, email: email || undefined });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Помилка збереження');
     } finally {
@@ -71,6 +72,11 @@ export default function MasterFormModal({ master, onSave, onClose }: Props) {
         <div className={styles.field}>
           <label className={styles.label}>Опис</label>
           <textarea className={styles.textarea} value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>Email (для сповіщень)</label>
+          <input className={styles.input} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="master@gmail.com" />
         </div>
 
         <div className={styles.field}>

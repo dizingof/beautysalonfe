@@ -46,6 +46,7 @@ export interface BookingData {
   timeSlot: string | null;
   clientName: string;
   clientPhone: string;
+  clientEmail: string;
 }
 
 export interface ContactInfo {
